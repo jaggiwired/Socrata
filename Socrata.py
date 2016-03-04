@@ -20,14 +20,18 @@
  *                                                                         *
  ***************************************************************************/
 """
-from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
-from PyQt4.QtGui import QAction, QIcon
+from PyQt4.QtCore import *
+from PyQt4.QtGui import *
 # Initialize Qt resources from file resources.py
 import resources
+from authenticate import Authenticate
 # Import the code for the dialog
 from Socrata_dialog import SocrataDialog
+from Socrata_dialog import MapDialog
+from Socrata_dialog import ErrorDialog
 import os.path
-
+import urllib2
+import json
 
 class Socrata:
     """QGIS Plugin Implementation."""
@@ -59,8 +63,19 @@ class Socrata:
                 QCoreApplication.installTranslator(self.translator)
 
         # Create the dialog (after translation) and keep reference
+        '''
+        Main dialog box
+        '''
         self.dlg = SocrataDialog()
-
+        '''
+        Domain maps
+        '''
+        self.mdlg = MapDialog()
+        QObject.connect(self.dlg.pushButton, SIGNAL("clicked()"), self.showMaps)
+        '''
+        Error box
+        '''
+        self.edlg = ErrorDialog()
         # Declare instance attributes
         self.actions = []
         self.menu = self.tr(u'&Socrata')
@@ -149,7 +164,7 @@ class Socrata:
             self.toolbar.addAction(action)
 
         if add_to_menu:
-            self.iface.addPluginToMenu(
+            self.iface.addPluginToWebMenu(
                 self.menu,
                 action)
 
@@ -178,9 +193,69 @@ class Socrata:
         # remove the toolbar
         del self.toolbar
 
+    def throwError(self, message):
+        self.edlg.label.setText(message)
+        self.edlg.show()
+        return
 
+    def get_settings(self):
+        domain = self.dlg.domain.text()
+        uid = self.dlg.uid.text()
+        return domain, uid
+
+    def get_metadata(self):
+        resource = 'https://'+self.domain+"/api/views/"+self.uid
+        response = urllib2.urlopen(resource)
+        return json.load(response)
+
+    def get_new_uid(self):
+        metadata = self.get_metadata()
+        new_uid = metadata['childViews'][0]
+        return new_uid
+
+    def get_maps(self):
+        resource = 'https://'+self.domain+"/api/search/views.json?limitTo=maps"
+        r = urllib2.urlopen(resource)
+        response = json.load(r)
+        if not "results" in response:
+            self.throwError("This domain requires authentication")
+            return
+        else:
+            return response
+
+    def showMaps(self):
+        self.domain, self.uid = self.get_settings()
+        self.mdlg.listWidget.clear()
+        get_all_maps = self.get_maps()
+        if not get_all_maps:
+            return
+
+        items_to_add = list()
+        for maps in get_all_maps['results']:
+            items_to_add.append(maps['view']['name'])
+        self.mdlg.listWidget.addItems(items_to_add)
+        self.mdlg.listWidget.sortItems()
+        self.mdlg.show()
+
+        result = self.mdlg.exec_()
+
+        if result:
+            self.item = self.mdlg.listWidget.currentItem()
+            self.item = self.item.text()
+            for maps in get_all_maps['results']:
+                if self.item == maps['view']['name']:
+                    self.uid = maps['view']['id']
+            self.dlg.uid.setText(self.uid)
+            self.new_uid = self.get_new_uid() 
+
+    def Auth(self):
+        if Authenticate(self.domain, self.username, self.password, self.app_token):
+            return True
+        else:
+            return False
     def run(self):
         """Run method that performs all the real work"""
+        
         # show the dialog
         self.dlg.show()
         # Run the dialog event loop
@@ -188,5 +263,6 @@ class Socrata:
         # See if OK was pressed
         if result:
             # Do something useful here - delete the line containing pass and
-            # substitute with your code.
-            pass
+            # substitute with your code. 
+            url = 'https://'+self.domain+"/resource/"+self.new_uid+".geojson"
+            layer = self.iface.addVectorLayer(url,self.item,"ogr")
