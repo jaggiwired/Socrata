@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>600</width>
-    <height>300</height>
+    <height>305</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="tab_3">
       <property name="sizePolicy">
@@ -83,7 +83,7 @@
         </widget>
        </item>
        <item row="5" column="2">
-        <widget class="QPushButton" name="pushButton_2">
+        <widget class="QPushButton" name="auth">
          <property name="text">
           <string>Authenticate</string>
          </property>
@@ -113,7 +113,14 @@
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QLineEdit" name="domain"/>
+        <widget class="QLineEdit" name="domain">
+         <property name="text">
+          <string/>
+         </property>
+         <property name="placeholderText">
+          <string>e.g. data.nola.gov</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -222,16 +229,6 @@
         <enum>Qt::Vertical</enum>
        </property>
       </widget>
-      <widget class="QFontComboBox" name="fontComboBox">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>90</y>
-         <width>251</width>
-         <height>28</height>
-        </rect>
-       </property>
-      </widget>
       <widget class="QLabel" name="label_8">
        <property name="geometry">
         <rect>
@@ -245,7 +242,7 @@
         <string>OR</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton_3">
+      <widget class="QPushButton" name="upload_layer">
        <property name="geometry">
         <rect>
          <x>50</x>
@@ -258,7 +255,7 @@
         <string>Upload</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton_4">
+      <widget class="QPushButton" name="upload">
        <property name="geometry">
         <rect>
          <x>362</x>
@@ -269,6 +266,16 @@
        </property>
        <property name="text">
         <string>Upload All Layers</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="layers">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>80</y>
+         <width>221</width>
+         <height>26</height>
+        </rect>
        </property>
       </widget>
      </widget>

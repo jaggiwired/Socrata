@@ -30,7 +30,7 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
 
 MAP_CLASS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'Domain_maps.ui'))
 
-ERROR_CLASS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'ErrorBox.ui'))
+MESSAGE_CLASS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'MessageBox.ui'))
 class SocrataDialog(QtGui.QDialog, FORM_CLASS):
     def __init__(self, parent=None):
         """Constructor."""
@@ -53,10 +53,10 @@ class MapDialog(QtGui.QDialog, MAP_CLASS):
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
 
-class ErrorDialog(QtGui.QDialog, ERROR_CLASS):
+class MessageDialog(QtGui.QDialog, MESSAGE_CLASS):
     def __init__(self, parent=None):
         """Constructor."""
-        super(ErrorDialog, self).__init__(parent)
+        super(MessageDialog, self).__init__(parent)
         # Set up the user interface from Designer.
         # After setupUI you can access any designer object by doing
         # self.<objectname>, and you can use autoconnect slots - see
