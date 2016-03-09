@@ -80,13 +80,6 @@ class Socrata:
         Bind Authentication method
         '''
         QObject.connect(self.dlg.auth, SIGNAL("clicked()"), self.Auth)
-
-        '''
-        UPLOAD BUTTONS
-        '''
-        #QObject.connect(self.dlg.upload, SIGNAL("clicked()"), self.UploadAll)
-        #QObject.connect(self.dlg.upload_layer, SIGNAL("clicked()"), self.UploadLayer)
-
         # Declare instance attributes
         self.actions = []
         self.menu = self.tr(u'&Socrata')
@@ -204,16 +197,7 @@ class Socrata:
             self.iface.removeToolBarIcon(action)
         # remove the toolbar
         del self.toolbar
-    
-    ###UPLOAD####
-    def get_layers(self):
-        layers = self.iface.legendInterface().layers()
-        for layer in layers:
-            self.dlg.layer.addItem(layer)
-        return
 
-
-    ### HELPERS###
     def showMessage(self, message):
         self.edlg.label.setText(message)
         self.edlg.show()
@@ -231,30 +215,19 @@ class Socrata:
         return
 
     def get_metadata(self):
-        resource = 'https://'+self.domain+"/api/views/"+self.uid+"?method=getDefaultView&admin=true"
+        resource = 'https://'+self.domain+"/api/views/"+self.uid
         response = urllib2.urlopen(resource)
         return json.load(response)
-    
-    def get_NBE(self):
-        resource = "https://"+self.domain+"/api/migrations/"+self.uid+".json"
-        print(resource)
-        r = urllib2.urlopen(resource)
-        response = json.load(r)
-        return response['nbeId']
 
     def get_new_uid(self):
         metadata = self.get_metadata()
-        #Is it a map already?
         try:
             new_uid = metadata['childViews'][0]
             return new_uid
-        #If it is a dataset - treat it differently
         except KeyError:
-            self.uid = metadata['id']
-            new_uid = self.get_NBE()
-            return new_uid
+            self.showMessage("Unable to render map")
+            return
 
-    ###DOWNLOAD####
     def get_maps(self):
         self.get_auth()
         if not self.username and not self.password:
@@ -266,7 +239,7 @@ class Socrata:
                     self.showMessage("This domain requires authentication")
                 else:
                     return response
-            except urllib2.URLError as e:
+            except urllib2.URLError, e:
                 self.showMessage("Domain not found or improperly formatted. Reason: "+str(e.reason))
         else:    
             try:
@@ -279,7 +252,7 @@ class Socrata:
                     return response
                 else:
                     return
-            except urllib2.URLError as e:
+            except urllib2.URLError, e:
                 self.showMessage("Domain not found or improperly formatted. Reason: "+str(e.reason))
 
     def showMaps(self):
@@ -306,7 +279,7 @@ class Socrata:
                     self.uid = maps['view']['id']
             self.new_uid = self.get_new_uid()
             self.dlg.uid.setText(self.new_uid)
-            
+
     def Authenticate(self):
         try:
             resource = 'https://'+self.domain+"/api/users/current.json"
@@ -319,7 +292,7 @@ class Socrata:
             else:
                 self.showMessage("Unauthenticated User, requires Admin, Publisher, or Editor rights")
                 return False
-        except urllib2.URLError as e:
+        except urllib2.URLError, e:
             self.showMessage("Authentication error: "+str(e.reason))
             return False
 
@@ -340,12 +313,9 @@ class Socrata:
         self.dlg.show()
         # Run the dialog event loop
         result = self.dlg.exec_()
-
-        if self.dlg.upload_tab.isActiveWindow():
-            self.get_layers()
         # See if OK was pressed
         if result and len(self.new_uid) > 6:
-            url = 'https://'+self.domain+"/resource/"+self.new_uid+".geojson?$limit=80000"
+            url = 'https://'+self.domain+"/resource/"+self.new_uid+".geojson"
             layer = self.iface.addVectorLayer(url,self.item,"ogr")
         if result and len(self.new_uid) < 6:
             result = self.run()

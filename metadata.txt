@@ -9,15 +9,15 @@
 [general]
 name=Socrata
 qgisMinimumVersion=2.0
-description=Automatically Download or Upload to Socrata
-version=0.1
-author=Socrata, Inc
+description=Download maps from Socrata
+version=0.2
+author=Peter Moore
 email=peter.moore@socrata.com
 
-about=Socrata
+about=This is a simple plugin built to facilitate GIS sharing from Socrata sites. It is added to the web menu, as it is pulling from web datasets.
 
-tracker=https://github.com/PeterAustinMoore/Socrata-QGIS
-repository=https://github.com/PeterAustinMoore/Socrata-QGIS
+tracker=https://github.com/PeterAustinMoore/Socrata
+repository=https://github.com/PeterAustinMoore/Socrata
 # End of mandatory metadata
 
 # Recommended items:
@@ -26,13 +26,13 @@ repository=https://github.com/PeterAustinMoore/Socrata-QGIS
 # changelog=
 
 # Tags are comma separated with spaces allowed
-tags=
+tags=Socrata, Maps, GIS, Open Data
 
-homepage=
+homepage=https://www.socrata.com
 category=Plugins
 icon=icon.png
 # experimental flag
-experimental=False
+experimental=True
 
 # deprecated flag (applies to the whole plugin, not just a single version)
 deprecated=False
