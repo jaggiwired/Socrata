@@ -19,7 +19,7 @@
      <property name="currentIndex">
       <number>2</number>
      </property>
-     <widget class="QWidget" name="tab_3">
+     <widget class="QWidget" name="settings">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
         <horstretch>0</horstretch>
@@ -124,7 +124,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_2">
+     <widget class="QWidget" name="download">
       <attribute name="title">
        <string>Download</string>
       </attribute>
@@ -186,7 +186,7 @@
        </property>
       </widget>
      </widget>
-     <widget class="QWidget" name="tab">
+     <widget class="QWidget" name="upload_tab">
       <attribute name="title">
        <string>Upload</string>
       </attribute>

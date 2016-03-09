@@ -207,9 +207,11 @@ class Socrata:
     
     ###UPLOAD####
     def get_layers(self):
+        layers = self.iface.legendInterface().layers()
+        for layer in layers:
+            self.dlg.layer.addItem(layer)
         return
-    def set_layers(self):
-        return
+
 
     ### HELPERS###
     def showMessage(self, message):
@@ -264,7 +266,7 @@ class Socrata:
                     self.showMessage("This domain requires authentication")
                 else:
                     return response
-            except urllib2.URLError, e:
+            except urllib2.URLError as e:
                 self.showMessage("Domain not found or improperly formatted. Reason: "+str(e.reason))
         else:    
             try:
@@ -277,7 +279,7 @@ class Socrata:
                     return response
                 else:
                     return
-            except urllib2.URLError, e:
+            except urllib2.URLError as e:
                 self.showMessage("Domain not found or improperly formatted. Reason: "+str(e.reason))
 
     def showMaps(self):
@@ -317,7 +319,7 @@ class Socrata:
             else:
                 self.showMessage("Unauthenticated User, requires Admin, Publisher, or Editor rights")
                 return False
-        except urllib2.URLError, e:
+        except urllib2.URLError as e:
             self.showMessage("Authentication error: "+str(e.reason))
             return False
 
@@ -338,6 +340,9 @@ class Socrata:
         self.dlg.show()
         # Run the dialog event loop
         result = self.dlg.exec_()
+
+        if self.dlg.upload_tab.isActiveWindow():
+            self.get_layers()
         # See if OK was pressed
         if result and len(self.new_uid) > 6:
             url = 'https://'+self.domain+"/resource/"+self.new_uid+".geojson?$limit=80000"
