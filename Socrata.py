@@ -213,9 +213,15 @@ class Socrata:
         self.password = self.dlg.password.text()
         self.app_token = self.dlg.app_token.text()
         return
+        
+    def get_nbe_id(self, uid):
+        resource = 'https://'+self.domain+"/api/migrations/"+uid+".json"
+        r = urllib2.urlopen(resource)
+        response = json.load(r)
+        return response['nbeId']
 
     def get_metadata(self):
-        resource = 'https://'+self.domain+"/api/views/"+self.uid
+        resource = 'https://'+self.domain+"/api/views/"+self.uid+'?method=getDefaultView&admin=true'
         response = urllib2.urlopen(resource)
         return json.load(response)
 
@@ -225,8 +231,9 @@ class Socrata:
             new_uid = metadata['childViews'][0]
             return new_uid
         except KeyError:
-            self.showMessage("Unable to render map")
-            return
+            new_uid = self.get_nbe_id(metadata['id'])
+            #self.showMessage("Unable to render map")
+            return new_uid
 
     def get_maps(self):
         self.get_auth()
