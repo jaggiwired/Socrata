@@ -9,8 +9,8 @@
 [general]
 name=Socrata
 qgisMinimumVersion=2.0
-description=Download maps from Socrata
-version=0.2
+description=Download maps from Socrata-powered data portals
+version=0.3
 author=Peter Moore
 email=peter.moore@socrata.com
 
@@ -23,16 +23,16 @@ repository=https://github.com/PeterAustinMoore/Socrata
 # Recommended items:
 
 # Uncomment the following line and add your changelog:
-# changelog=
+changelog= Fixed nonrendering maps and the infinite recursion thing. None.
 
 # Tags are comma separated with spaces allowed
-tags=Socrata, Maps, GIS, Open Data
+tags=Socrata, Maps, GIS, Open Data,Open, Data, Web, socrata
 
-homepage=https://www.socrata.com
+homepage=https://github.com/PeterAustinMoore/Socrata
 category=Plugins
 icon=icon.png
 # experimental flag
-experimental=True
+experimental=False
 
 # deprecated flag (applies to the whole plugin, not just a single version)
 deprecated=False

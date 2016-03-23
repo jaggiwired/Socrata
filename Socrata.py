@@ -7,7 +7,7 @@
                               -------------------
         begin                : 2016-03-01
         git sha              : $Format:%H$
-        copyright            : (C) 2016 by Socrata, Inc
+        copyright            : (C) 2016 by Peter Moore
         email                : peter.moore@socrata.com
  ***************************************************************************/
 
@@ -213,7 +213,7 @@ class Socrata:
         self.password = self.dlg.password.text()
         self.app_token = self.dlg.app_token.text()
         return
-        
+
     def get_nbe_id(self, uid):
         resource = 'https://'+self.domain+"/api/migrations/"+uid+".json"
         r = urllib2.urlopen(resource)
@@ -324,8 +324,6 @@ class Socrata:
         if result and len(self.new_uid) > 6:
             url = 'https://'+self.domain+"/resource/"+self.new_uid+".geojson"
             layer = self.iface.addVectorLayer(url,self.item,"ogr")
-        if result and len(self.new_uid) < 6:
-            result = self.run()
  
 def get_headers(domain, username, password, app_token):
     headers = {}
