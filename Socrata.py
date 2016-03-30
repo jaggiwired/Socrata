@@ -322,7 +322,7 @@ class Socrata:
         result = self.dlg.exec_()
         # See if OK was pressed
         if result and len(self.new_uid) > 6:
-            url = 'https://'+self.domain+"/resource/"+self.new_uid+".geojson"
+            url = 'https://'+self.domain+"/resource/"+self.new_uid+".geojson?$limit=100000"
             layer = self.iface.addVectorLayer(url,self.item,"ogr")
  
 def get_headers(domain, username, password, app_token):
