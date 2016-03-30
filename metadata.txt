@@ -14,7 +14,7 @@ version=0.3
 author=Peter Moore
 email=peter.moore@socrata.com
 
-about=This is a simple plugin built to facilitate GIS sharing from Socrata sites. It is added to the web menu, as it is pulling from web datasets.
+about=This is a simple plugin built to facilitate GIS sharing from Socrata sites. It is added to the web menu, as it is pulling from web datasets. This is not a Socrata product.
 
 tracker=https://github.com/PeterAustinMoore/Socrata
 repository=https://github.com/PeterAustinMoore/Socrata
