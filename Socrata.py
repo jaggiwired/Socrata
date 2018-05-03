@@ -36,10 +36,20 @@ from .Socrata_dialog import SocrataDialog, MapDialog, MessageDialog
 #Standard Libraries
 import os.path
 import urllib.request, urllib.error, urllib.parse
-import ssl
-ssl._create_default_https_context = ssl._create_unverified_context
 import json
 from base64 import b64encode
+
+# NOTE: SOCRATA USES TLSv1.1+ BY DEFAULT. CURRENTLY, BOTH MAC AND WINDOWS
+# VERSIONS DO NOT ALLOW YOU TO SET UP YOUR OWN CERTIFICATES, SO YOUR TRAFFIC
+# IS NOT GOING TO BE SSL-ED UNTIL IT IS FIXED
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
+try:
+    import gdal
+    gdal.SetConfigOption("GDAL_HTTP_UNSAFESSL", "YES")
+except ModuleNotFoundError:
+    pass
+
 
 class Socrata(object):
     """QGIS Plugin Implementation."""
