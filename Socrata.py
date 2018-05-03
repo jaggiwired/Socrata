@@ -20,26 +20,34 @@
  *                                                                         *
  ***************************************************************************/
 """
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+
+from builtins import str
+from builtins import object
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+
+from qgis.PyQt.QtWidgets import QAction, QDialog, QDialogButtonBox
+
 # Initialize Qt resources from file resources.py
-import resources
+from .resources import *
 # Import the code for the dialog
-from Socrata_dialog import SocrataDialog, MapDialog, MessageDialog
+from .Socrata_dialog import SocrataDialog, MapDialog, MessageDialog
 
 #Standard Libraries
 import os.path
-import urllib2
+import urllib.request, urllib.error, urllib.parse
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
 import json
 from base64 import b64encode
 
-class Socrata:
+class Socrata(object):
     """QGIS Plugin Implementation."""
 
     def __init__(self, iface):
         """Constructor.
 
-        :param iface: An interface instance that will be passed to this class
+        :param iface: An interface that will be passed to this class
             which provides the hook by which you can manipulate the QGIS
             application at run time.
         :type iface: QgsInterface
@@ -71,7 +79,7 @@ class Socrata:
         Domain maps
         '''
         self.mdlg = MapDialog()
-        QObject.connect(self.dlg.pushButton, SIGNAL("clicked()"), self.showMaps)
+        self.dlg.pushButton.clicked.connect(self.showMaps)
         '''
         Message box
         '''
@@ -79,8 +87,8 @@ class Socrata:
         '''
         Bind Authentication method
         '''
-        QObject.connect(self.dlg.auth, SIGNAL("clicked()"), self.Auth)
-        # Declare instance attributes
+        self.dlg.auth.clicked.connect(self.Auth)
+        # Declare iface attributes
         self.actions = []
         self.menu = self.tr(u'&Socrata')
         # TODO: We are going to let the user set this up in a future iteration
@@ -180,7 +188,7 @@ class Socrata:
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
-        icon_path = ':/plugins/Socrata/icon.png'
+        icon_path = ':/python/plugins/Socrata/icon.png'
         self.add_action(
             icon_path,
             text=self.tr(u'Socrata Plugin'),
@@ -216,13 +224,13 @@ class Socrata:
 
     def get_nbe_id(self, uid):
         resource = 'https://'+self.domain+"/api/migrations/"+uid+".json"
-        r = urllib2.urlopen(resource)
+        r = urllib.request.urlopen(resource)
         response = json.load(r)
         return response['nbeId']
 
     def get_metadata(self):
         resource = 'https://'+self.domain+"/api/views/"+self.uid+'?method=getDefaultView&admin=true'
-        response = urllib2.urlopen(resource)
+        response = urllib.request.urlopen(resource)
         return json.load(response)
 
     def get_new_uid(self):
@@ -240,26 +248,26 @@ class Socrata:
         if not self.username and not self.password:
             try:
                 resource = 'https://'+self.domain+"/api/search/views.json?limitTo=maps"
-                r = urllib2.urlopen(resource)
+                r = urllib.request.urlopen(resource)
                 response = json.load(r)
                 if not "results" in response:
                     self.showMessage("This domain requires authentication")
                 else:
                     return response
-            except urllib2.URLError, e:
+            except urllib.error.URLError as e:
                 self.showMessage("Domain not found or improperly formatted. Reason: "+str(e.reason))
-        else:    
+        else:
             try:
                 resource = 'https://'+self.domain+"/api/search/views.json?limitTo=maps"
                 if self.Authenticate():
-                    request = urllib2.Request(resource, headers=get_headers(
+                    request = urllib.request.urlopen(resource, headers=get_headers(
                         self.domain, self.username, self.password, self.app_token))
-                    r = urllib2.urlopen(request)
+                    r = urllib.request.urlopen(resource)
                     response = json.load(r)
                     return response
                 else:
                     return
-            except urllib2.URLError, e:
+            except urllib.error.URLError as e:
                 self.showMessage("Domain not found or improperly formatted. Reason: "+str(e.reason))
 
     def showMaps(self):
@@ -290,16 +298,16 @@ class Socrata:
     def Authenticate(self):
         try:
             resource = 'https://'+self.domain+"/api/users/current.json"
-            request = urllib2.Request(resource, headers=get_headers(
+            request = urllib.request.urlopen(resource, headers=get_headers(
                 self.domain, self.username, self.password, self.app_token))
-            r = urllib2.urlopen(request)
+            r = urllib.request.urlopen(request)
             response = json.load(r)
             if "rights" in response:
                 return True
             else:
                 self.showMessage("Unauthenticated User, requires Admin, Publisher, or Editor rights")
                 return False
-        except urllib2.URLError, e:
+        except urllib.error.URLError as e:
             self.showMessage("Authentication error: "+str(e.reason))
             return False
 
@@ -316,15 +324,15 @@ class Socrata:
 
     def run(self):
         """Run method that performs all the real work"""
-        # show the dialog
+        # show the dialogbox
         self.dlg.show()
-        # Run the dialog event loop
+        # Run the dialogbox event loop
         result = self.dlg.exec_()
         # See if OK was pressed
         if result and len(self.new_uid) > 6:
-            url = 'https://'+self.domain+"/resource/"+self.new_uid+".geojson?$limit=100000"
+            url = 'https://'+self.domain+"/resource/"+self.new_uid+".geojson?$limit=10000000"
             layer = self.iface.addVectorLayer(url,self.item,"ogr")
- 
+
 def get_headers(domain, username, password, app_token):
     headers = {}
 
@@ -334,11 +342,11 @@ def get_headers(domain, username, password, app_token):
 
     headers['X-App-Token'] = app_token
 
-    return headers  
+    return headers
 
 def get_auth_token(auth = None, username = None, password = None):
     if auth is not None:
         result = b64encode(b"%s" % auth).decode("ascii")
     else:
         result = b64encode(b"{0}:{1}".format(username, password).decode("ascii"))
-    return result           
+    return result
