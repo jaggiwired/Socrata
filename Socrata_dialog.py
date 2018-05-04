@@ -23,7 +23,9 @@
 
 import os
 
-from PyQt4 import QtGui, uic
+from PyQt5 import QtGui, uic
+
+from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'Socrata_dialog_base.ui'))
@@ -31,7 +33,7 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
 MAP_CLASS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'Domain_maps.ui'))
 
 MESSAGE_CLASS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'MessageBox.ui'))
-class SocrataDialog(QtGui.QDialog, FORM_CLASS):
+class SocrataDialog(QDialog, FORM_CLASS):
     def __init__(self, parent=None):
         """Constructor."""
         super(SocrataDialog, self).__init__(parent)
@@ -42,7 +44,7 @@ class SocrataDialog(QtGui.QDialog, FORM_CLASS):
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
 
-class MapDialog(QtGui.QDialog, MAP_CLASS):
+class MapDialog(QDialog, MAP_CLASS):
     def __init__(self, parent=None):
         """Constructor."""
         super(MapDialog, self).__init__(parent)
@@ -53,7 +55,7 @@ class MapDialog(QtGui.QDialog, MAP_CLASS):
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
 
-class MessageDialog(QtGui.QDialog, MESSAGE_CLASS):
+class MessageDialog(QDialog, MESSAGE_CLASS):
     def __init__(self, parent=None):
         """Constructor."""
         super(MessageDialog, self).__init__(parent)

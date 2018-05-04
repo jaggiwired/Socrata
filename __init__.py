@@ -24,10 +24,10 @@
 
 
 # noinspection PyPep8Naming
-def classFactory(iface):  # pylint: disable=invalid-name
+def classFactory(iface):
     """Load Socrata class from file Socrata.
 
-    :param iface: A QGIS interface instance.
+    :param iface: A QGIS interface.
     :type iface: QgsInterface
     """
     #

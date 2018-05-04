@@ -1,20 +1,20 @@
 from base64 import b64encode
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import json
 
 def Authenticate(domain, username, password, app_token):
 	try:
 		resource = 'https://'+domain+"/api/users/current.json"
-		request = urllib2.Request(resource, headers=get_headers(domain, username, password, app_token))
+		request = urllib.request.Request(resource, headers=get_headers(domain, username, password, app_token))
 		r = urllib2.urlopen(request)
 		response = json.load(r)
-		if "roleName" in response: 
+		if "roleName" in response:
 			return True
 		else:
 			return False
-	except urllib2.URLError, e:
+	except urllib.error.URLError as e:
 		return False
-		
+
 def get_headers(domain, username, password, app_token):
     headers = {}
 
@@ -24,7 +24,7 @@ def get_headers(domain, username, password, app_token):
 
     headers['X-App-Token'] = app_token
 
-    return headers  
+    return headers
 
 def get_auth_token(auth = None, username = None, password = None):
     if auth is not None:
