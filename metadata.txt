@@ -10,7 +10,7 @@
 name=Socrata
 qgisMinimumVersion=3.0
 description=Download maps from Socrata-powered data portals
-version=2.0
+version=2.1
 author=Peter Moore
 email=peter.moore@socrata.com
 
