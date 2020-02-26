@@ -105,7 +105,10 @@ class Socrata(object):
         self.toolbar = self.iface.addToolBar(u'Socrata')
         self.toolbar.setObjectName(u'Socrata')
 
-        self.new_uid = ''
+        self.domain = ""
+        self.uid = ""
+        self.search_api_base = "http://api.us.socrata.com/api/catalog/v1"
+
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
         """Get the translation for a string using Qt translation API.
@@ -222,9 +225,9 @@ class Socrata(object):
         return
 
     def get_settings(self):
-        domain = self.dlg.domain.text()
-        uid = self.dlg.uid.text()
-        return domain, uid
+        self.domain = self.dlg.domain.text()
+        self.uid = self.dlg.uid.text()
+        return
 
     def get_auth(self):
         self.username = self.dlg.username.text()
@@ -232,35 +235,14 @@ class Socrata(object):
         self.app_token = self.dlg.app_token.text()
         return
 
-    def get_nbe_id(self, uid):
-        resource = 'https://'+self.domain+"/api/migrations/"+uid+".json"
-        r = urllib.request.urlopen(resource)
-        response = json.load(r)
-        return response['nbeId']
-
-    def get_metadata(self):
-        resource = 'https://'+self.domain+"/api/views/"+self.uid+'?method=getDefaultView&admin=true'
-        response = urllib.request.urlopen(resource)
-        return json.load(response)
-
-    def get_new_uid(self):
-        metadata = self.get_metadata()
-        try:
-            new_uid = metadata['childViews'][0]
-            return new_uid
-        except KeyError:
-            new_uid = self.get_nbe_id(metadata['id'])
-            #self.showMessage("Unable to render map")
-            return new_uid
-
     def get_maps(self):
         self.get_auth()
         if not self.username and not self.password:
             try:
-                resource = 'https://'+self.domain+"/api/search/views.json?limitTo=maps"
+                resource = f"{self.search_api_base}?only=maps&domains={self.domain}"
                 r = urllib.request.urlopen(resource)
                 response = json.load(r)
-                if not "results" in response:
+                if not "results" in response.keys():
                     self.showMessage("This domain requires authentication")
                 else:
                     return response
@@ -268,7 +250,7 @@ class Socrata(object):
                 self.showMessage("Domain not found or improperly formatted. Reason: "+str(e.reason))
         else:
             try:
-                resource = 'https://'+self.domain+"/api/search/views.json?limitTo=maps"
+                resource = f"{self.search_api_base}?only=maps&domains={self.domain}"
                 if self.Authenticate():
                     request = urllib.request.urlopen(resource, headers=get_headers(
                         self.domain, self.username, self.password, self.app_token))
@@ -281,7 +263,8 @@ class Socrata(object):
                 self.showMessage("Domain not found or improperly formatted. Reason: "+str(e.reason))
 
     def showMaps(self):
-        self.domain, self.uid = self.get_settings()
+        self.get_settings()
+
         self.mdlg.listWidget.clear()
         get_all_maps = self.get_maps()
         if not get_all_maps:
@@ -289,7 +272,7 @@ class Socrata(object):
 
         items_to_add = list()
         for maps in get_all_maps['results']:
-            items_to_add.append(maps['view']['name'])
+            items_to_add.append(maps['resource']['name'])
         self.mdlg.listWidget.addItems(items_to_add)
         self.mdlg.listWidget.sortItems()
         self.mdlg.show()
@@ -300,10 +283,9 @@ class Socrata(object):
             self.item = self.mdlg.listWidget.currentItem()
             self.item = self.item.text()
             for maps in get_all_maps['results']:
-                if self.item == maps['view']['name']:
-                    self.uid = maps['view']['id']
-            self.new_uid = self.get_new_uid()
-            self.dlg.uid.setText(self.new_uid)
+                if self.item == maps['resource']['name']:
+                    self.uid = maps['resource']['id']
+            self.dlg.uid.setText(self.uid)
 
     def Authenticate(self):
         try:
@@ -339,9 +321,12 @@ class Socrata(object):
         # Run the dialogbox event loop
         result = self.dlg.exec_()
         # See if OK was pressed
-        if result and len(self.new_uid) > 6:
-            url = 'https://'+self.domain+"/resource/"+self.new_uid+".geojson?$limit=10000000"
-            layer = self.iface.addVectorLayer(url,self.item,"ogr")
+        self.get_settings()
+        if self.domain == "" or self.uid == "":
+            self.showMessage("Please enter domain and/or dataset id")
+        if result and len(self.uid) > 6:
+            url = 'https://'+self.domain+"/resource/"+self.uid+".geojson?$limit=10000000"
+            layer = self.iface.addVectorLayer(url, self.uid, "ogr")
 
 def get_headers(domain, username, password, app_token):
     headers = {}
