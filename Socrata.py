@@ -232,14 +232,13 @@ class Socrata(object):
     def get_auth(self):
         self.username = self.dlg.username.text()
         self.password = self.dlg.password.text()
-        self.app_token = self.dlg.app_token.text()
         return
 
     def get_maps(self):
         self.get_auth()
         if not self.username and not self.password:
             try:
-                resource = f"{self.search_api_base}?only=maps&domains={self.domain}"
+                resource = f"{self.search_api_base}?only=maps&domains={self.domain}&limit=9999&offset=0"
                 r = urllib.request.urlopen(resource)
                 response = json.load(r)
                 if not "results" in response.keys():
@@ -250,7 +249,7 @@ class Socrata(object):
                 self.showMessage("Domain not found or improperly formatted. Reason: "+str(e.reason))
         else:
             try:
-                resource = f"{self.search_api_base}?only=maps&domains={self.domain}"
+                resource = f"{self.search_api_base}?only=maps&domains={self.domain}&limit=9999&offset=0"
                 if self.Authenticate():
                     request = urllib.request.urlopen(resource, headers=get_headers(
                         self.domain, self.username, self.password, self.app_token))
@@ -270,10 +269,10 @@ class Socrata(object):
         if not get_all_maps:
             return
 
-        items_to_add = list()
+        items_to_add = dict()
         for maps in get_all_maps['results']:
-            items_to_add.append(maps['resource']['name'])
-        self.mdlg.listWidget.addItems(items_to_add)
+            items_to_add[maps['resource']['name']] = maps['resource']['id']
+        self.mdlg.listWidget.addItems(items_to_add.keys())
         self.mdlg.listWidget.sortItems()
         self.mdlg.show()
 
@@ -282,9 +281,7 @@ class Socrata(object):
         if result:
             self.item = self.mdlg.listWidget.currentItem()
             self.item = self.item.text()
-            for maps in get_all_maps['results']:
-                if self.item == maps['resource']['name']:
-                    self.uid = maps['resource']['id']
+            self.uid = items_to_add.get(self.item)
             self.dlg.uid.setText(self.uid)
 
     def Authenticate(self):
@@ -326,7 +323,7 @@ class Socrata(object):
             self.showMessage("Please enter domain and/or dataset id")
         if result and len(self.uid) > 6:
             url = 'https://'+self.domain+"/resource/"+self.uid+".geojson?$limit=10000000"
-            layer = self.iface.addVectorLayer(url, self.uid, "ogr")
+            layer = self.iface.addVectorLayer(url, f"{self.item}-{self.uid}", "ogr")
 
 def get_headers(domain, username, password, app_token):
     headers = {}
@@ -334,8 +331,6 @@ def get_headers(domain, username, password, app_token):
     headers["Authorization"] = "Basic %s" % get_auth_token(username=username,password=password)
 
     headers['X-Socrata-Host'] = domain
-
-    headers['X-App-Token'] = app_token
 
     return headers
 
